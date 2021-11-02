@@ -2,12 +2,6 @@ import numpy as np
 import pandas as pd
 from src import basis, lci_test
 
-###
-# from src import simulation, lci_test, tools, omega, likelihood
-# from scipy.optimize import minimize, Bounds
-# import matplotlib.pyplot as plt
-###
-
 
 df = pd.read_csv("example_data.csv")
 dims = np.unique(df['id']).size
@@ -40,4 +34,4 @@ S["basis2"] = basis.Basis((-5, S["kernel_support"]), S["df2"])
 S["size_grid"] = S['df1']-2
 
 # Test local independence a -/> b | C
-lci_test.lci_test(S, ts)
+print(lci_test.lci_test(S, ts))
