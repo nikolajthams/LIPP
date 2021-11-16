@@ -5,7 +5,7 @@ import pickle
 
 # Load data
 start, finish = 9.468, 19.468
-df = pd.read_csv("spikes2.txt", sep=" ")
+df = pd.read_csv("turtle_data.txt", sep=" ")
 df["markTypeRaw"] = df.markType.str.split("_", expand=True)[0]
 df["stimulus"] = (df["time"] >= start) & (df["time"] <= finish)
 dims = 6
