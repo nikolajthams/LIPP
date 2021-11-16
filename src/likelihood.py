@@ -1,4 +1,11 @@
 import numpy as np
+import warnings
+warn_list = ["divide by zero encountered in log",
+             "divide by zero encountered in true_divide",
+             "invalid value encountered in log",
+             "invalid value encountered in true_divide"]
+for warn in warn_list: warnings.filterwarnings("ignore", message=warn)
+warnings.filterwarnings("ignore",category=DeprecationWarning)
 
 def likelihood(beta, x_direct, x_integrated, scale=1, dx=None, kappa=1, Omega=None, phi_inv=lambda x: x, dphi_inv=lambda x: 1):
     l = np.log(phi_inv(x_direct.dot(beta))).sum() if x_direct.size > 0 else 0

@@ -29,16 +29,15 @@ def first_intensities(ss, ts, keys, basis, kernel_support, pos=False):
     else:
         return np.stack([first_intensity(s, ts, keys, basis, kernel_support) for s in ss]), np.repeat(keys, basis.ncols)
 
-def direct_intensity(S, time, ts, abC, second_order=True, pos=True):
+def direct_intensity(basis1, basis2, kernel_support, time, ts, abC, second_order=True, pos=True):
     """ At each point in ts[b] computes the intensity vector"""
-    basis1, basis2, kernel_support = S["basis1"], S["basis2"], S["kernel_support"]
 
     # Initiate series
     a, b, C = abC.values()
     aC      = np.unique([a] + C)
 
     # Test dummy case
-    if time.size == 0: return None #np.empty((0, len(ts_ac)*basis.d.shape[1]))
+    if time.size == 0: return None
 
     # 0: Constant intercept
     zeroth      = np.ones((len(time), 1))
@@ -66,8 +65,8 @@ def direct_intensity(S, time, ts, abC, second_order=True, pos=True):
     if pos: return np.concatenate((zeroth, first, second), axis=1), np.concatenate((pos0, pos1, pos2), axis=1)
     else:   return np.concatenate((zeroth, first, second), axis=1)
 
-def integrated_intensity(S, time, ts, abC, second_order=True):
-    basis1, basis2, kernel_support = S["basis1"], S["basis2"], S["kernel_support"]
+def integrated_intensity(basis1, basis2, kernel_support, time, ts, abC, second_order=True):
+
     # Initiate series
     ts      = truncate(ts, time)
     a, b, C = abC.values()
@@ -112,13 +111,12 @@ def integrated_intensity(S, time, ts, abC, second_order=True):
     second          = second[upper_diag]
     return np.concatenate((zeroth, first, second))
 
-def integrated_outer_intensity(S, ts, abC, second_order=True, gran_factor=2):
-    run_time = S["run_time"]
+def integrated_outer_intensity(basis1, basis2, kernel_support, run_time, ts, abC, second_order=True, gran_factor=2):
     ts = truncate(ts, run_time)
     a, b, C = abC.values()
     granularity = int(run_time)*gran_factor
     grid = np.linspace(0, run_time, granularity)
-    x = direct_intensity(S, grid, ts, abC, second_order=second_order, pos=False)
+    x = direct_intensity(basis1, basis2, kernel_support, grid, ts, abC, second_order=second_order, pos=False)
     x[[0, -1]] /= 2
     dx = (run_time/granularity)
     # x = np.einsum("ij,ik -> jk", x, x)*(run_time/granularity)

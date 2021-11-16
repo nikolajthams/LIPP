@@ -11,9 +11,7 @@ def scale_omega(Omega, omega_scale, pos, C):
     Omega_tmp[idxC, idxC] *= omega_scale
     return Omega_tmp
 
-def get_omega_blocks(S, granularity=1000, second_order=True):
-    df1, df2, kernel_support = S["df1"], S["df2"], S["kernel_support"]
-    # a, b, C = abC.values()
+def get_omega_blocks(df1, df2, kernel_support, granularity=1000, second_order=True):
     def r_bs(df, derivs, intercept=False, plot=False):
         """Returns differentiated design matrices (using R-call via rpy2)"""
         base = importr('base')
@@ -77,12 +75,12 @@ def get_omega_blocks(S, granularity=1000, second_order=True):
 
     return block1, block_d, block_o
 
-def get_omega(S, pos, abC, blocks=None, granularity=1000, second_order=True, scale = 10):
+def get_omega(df1, df2, kernel_support, pos, abC, blocks=None, granularity=1000, second_order=True, scale = 10):
     a, b, C = abC.values()
-    param_size = int(1 + len([a] + C)*S["df1"] + (((len(C)*S["df2"])**2 + len(C)*S["df2"])/2 if second_order else 0))
+    param_size = int(1 + len([a] + C)*df1 + (((len(C)*df2)**2 + len(C)*df2)/2 if second_order else 0))
 
     if blocks is None:
-        blocks = get_omega_blocks(S, granularity=granularity, second_order=second_order)
+        blocks = get_omega_blocks(df1, df2, kernel_support, granularity=granularity, second_order=second_order)
 
     block1, block_d, block_o = blocks
     # Initialize
@@ -107,9 +105,9 @@ def get_omega(S, pos, abC, blocks=None, granularity=1000, second_order=True, sca
 
     return Omega
 
-def identity_omega(S, pos, abC, scale = 1):
+def identity_omega(omega_scale, pos, abC, scale = 1):
     a, b, C = abC.values()
     Omega = np.identity(pos[0].size)
     pos_2 = get_params(pos, C, 2)
-    Omega[np.ix_(pos_2, pos_2)] *= S['omega_scale']
+    Omega[np.ix_(pos_2, pos_2)] *= omega_scale
     return Omega
