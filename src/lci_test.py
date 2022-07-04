@@ -13,7 +13,7 @@ class LIPP:
                  dphi_inv=lambda x: np.exp(np.minimum(x, 1)-1)*(x<1) + 1*(x>=1),
                  df1=8, df2=3, kernel_support=10,
                  Omega=None, omega_scale=10, size_grid=None, blocks=None,
-                 abC=None):
+                 abC=None, initialize_blocks=False):
         self.second_order = second_order
         self.kappa = kappa
         self.phi_inv = phi_inv
@@ -29,6 +29,8 @@ class LIPP:
         self.basis1 = basis.Basis((-5, self.kernel_support), self.df1)
         self.basis2 = basis.Basis((-5, self.kernel_support), self.df2)
         self.size_grid = self.df1 - 2 if size_grid is None else size_grid
+        if initialize_blocks: 
+            self.set_blocks()
 
     def set_data(self, ts, run_time=None):
         self.ts = ts
@@ -145,7 +147,7 @@ class LIPP:
                 while (d < len(pa_v)) & (v_prime in pa_v):
                     for C in comb(pa_v - {v, v_prime}, d): #(1)
                         if verbose: print(f"Testing {v_prime} -> {v}|{list(C) + [v]}")
-                        abC = {"a": v_prime, "b": v, "C": list(C) + [v]} #(2)
+                        abC = {"a": v_prime, "b": v, "C": list(C) + [v]} # (2)
                         pos = tools.dummy_pos(self.basis1, self.basis2, abC=abC, second_order=self.second_order, dims=self.dims)
                         Omega = omega.get_omega(self.df1, self.df2, self.kernel_support, pos, abC, self.blocks, second_order=self.second_order)
                         p_val = self.lci_test(Omega=Omega, abC=abC)['pval']
